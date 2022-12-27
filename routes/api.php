@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\{AuthController, ProductController};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 */
 Route::post('register', [AuthController::class, 'register'])->name('user.register');
 Route::post('login', [AuthController::class, 'authenticate'])->name('user.login');
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+Route::group([], function (){
+    Route::apiResource('products', ProductController::class);
 });
 
