@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class CategoryProduct extends Model
 {
+    protected $guarded = ['id'];
     use HasFactory;
-    public function products(){
-        return $this->belongsToMany(CategoryProduct::class);
-    }
 }

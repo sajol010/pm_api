@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -24,6 +22,7 @@ class UserTest extends TestCase
         $response->assertJson([
             'success'=>true
         ]);
+        $this->assertDatabaseHas('users', ['email'=>'admin@admin.com']);
     }
 
     /**

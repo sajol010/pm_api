@@ -19,5 +19,6 @@ Route::post('login', [AuthController::class, 'authenticate'])->name('user.login'
 
 Route::group([], function (){
     Route::apiResource('products', ProductController::class);
+    Route::apiResource('categories', ProductController::class);
 });
 
