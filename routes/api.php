@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('register', [AuthController::class, 'register'])->name('user.register');
 Route::post('login', [AuthController::class, 'authenticate'])->name('user.login');
 
-Route::group([], function (){
+Route::group(['middleware'=>'auth:sanctum'], function (){
     Route::apiResource('products', ProductController::class);
     Route::apiResource('categories', ProductController::class);
 });

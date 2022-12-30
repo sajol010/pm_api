@@ -12,8 +12,11 @@ class ProductRepository extends RepositoryPattern implements ProductRepositoryIn
 {
     public function all($params=[])
     {
-        $products = Product::get();
-        $conditions = [];
+        if (!empty($params))
+            $products = Product::limit($params['limit'])->offset($params['offset'])->get();
+        else
+            $products = Product::all();
+
         return ProductResource::collection($products)->resolve();
     }
 

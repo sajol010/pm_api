@@ -19,10 +19,19 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = $this->productRepository->all();
-        return $this->success($data);
+        $limit = $request->limit??10;
+        $page = $request->page??1;
+        $offset = $limit * ($page-1);
+        $data = $this->productRepository->all(['limit'=>$limit, 'offset'=>$offset]);
+        $responseData = [
+            'list'=>$data,
+            'limit'=>$limit,
+            'page'=>$page,
+            'total'=> 21
+        ];
+        return $this->success($responseData);
     }
 
     /**
