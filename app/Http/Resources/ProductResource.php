@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class ProductResource extends JsonResource
 {
@@ -36,7 +37,7 @@ class ProductResource extends JsonResource
         foreach ($images as $image){
             $img[] = [
                 'id'=>$image->id,
-                'image'=>$image->image,
+                'image'=>url('storage/' . $image->image),
                 'product_id'=>$image->product_id,
             ];
         }

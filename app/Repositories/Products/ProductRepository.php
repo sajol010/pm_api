@@ -3,9 +3,11 @@
 namespace App\Repositories\Products;
 
 use App\Http\Resources\ProductResource;
+use App\Models\CategoryProduct;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Repositories\RepositoryPattern;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -56,19 +58,29 @@ class ProductRepository extends RepositoryPattern implements ProductRepositoryIn
     }
 
     private function saveRelationals($product){
-        if (!empty(request()->category_ids))
+        if (!empty(request()->category_ids)){
+            $existings = CategoryProduct::where(['product_id'=>$product->id])->get();
+            foreach ($existings as $prod)
+                $prod->delete();
             foreach (explode(',', request()->category_ids) as $category_id)
                 $product->categories()->attach($product, ['category_id'=>$category_id]);
+        }
 
-        if (!empty(request()->images))
+        if (!empty(request()->images)){
+            $existings = ProductImage::where(['product_id'=>$product->id])->get();
+            foreach ($existings as $prod)
+                $prod->delete();
+
             foreach (request()->images as $image){
-                $imageName = time().'.'.$image->extension();
-                if ($image->move(public_path('public/images/products/'), $imageName)){
-//                    Storage::putFileAs('public/images/products/'.$product->id . '/' . $imageName, (string)$image->encode('png', 95), $imageName);
-                    $product->images()->save((new ProductImage(['image'=>$imageName])));
+                $imageName = time() .'.'. $image->getClientOriginalExtension();
+                    $image->storeAs('public/images/products/', $imageName);
+                    $finalName = '/images/products/' . $imageName;
+                    $product->images()->save((new ProductImage(['image'=>$finalName])));
 
-                }
+//                }
             }
+        }
+
 
     }
 
@@ -102,6 +114,7 @@ class ProductRepository extends RepositoryPattern implements ProductRepositoryIn
     }
 
     public function delete($id){
+
         $product = Product::findOrFail($id);
         if ($product->delete())
             return true;

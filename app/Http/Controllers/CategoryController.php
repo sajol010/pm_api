@@ -20,7 +20,7 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $forOption = $request->for_option??false;
+        $forOption = (empty($request->for_option) || $request->for_option == 'false')?false:true;
         $data = $this->categoryRepository->all(['for_option'=>$forOption]);
         return $this->success($data);
     }
