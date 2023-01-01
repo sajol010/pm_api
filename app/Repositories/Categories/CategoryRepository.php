@@ -10,9 +10,11 @@ class CategoryRepository extends RepositoryPattern implements CategoryRepository
 {
     public function all($params=[])
     {
-        $products = Category::all();
-        $conditions = [];
-        return $products;
+        $categories = Category::all();
+        if (!empty($params['for_option'])){
+            $categories =$categories = $categories->map->optionFormat();
+        }
+        return $categories;
     }
 
     public function save(): array
@@ -26,7 +28,7 @@ class CategoryRepository extends RepositoryPattern implements CategoryRepository
 
         $category = new Category();
         $category->name = request()->name;
-        $category->parent_id = request()->parent_id??'';
+        $category->parent_id = request()->parent_id??0;
 
         if ($category->save()){
             return ['success'=>true, 'data'=>$category];
@@ -45,7 +47,7 @@ class CategoryRepository extends RepositoryPattern implements CategoryRepository
             return ['success'=>false, 'errors'=>$validator->errors(), 'status'=>422];
         $category = Category::findOrFail($id);
         $category->name = request()->name;
-        $category->parent_id = request()->parent_id??'';
+        $category->parent_id = request()->parent_id??0;
         if ($category->save()){
             return ['success'=>true, 'data'=>$category];
         }

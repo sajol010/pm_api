@@ -7,15 +7,17 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Repositories\RepositoryPattern;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class ProductRepository extends RepositoryPattern implements ProductRepositoryInterface
 {
     public function all($params=[])
     {
         if (!empty($params))
-            $products = Product::limit($params['limit'])->offset($params['offset'])->get();
+            $products = Product::with(['images'])->limit($params['limit'])->offset($params['offset'])->get();
         else
             $products = Product::all();
+
 
         return ProductResource::collection($products)->resolve();
     }
@@ -31,10 +33,12 @@ class ProductRepository extends RepositoryPattern implements ProductRepositoryIn
             return ['success'=>false, 'errors'=>$validator->errors(), 'status'=>422];
         $product = new Product();
         $product->name = request()->name;
-        $product->slug = request()->slug;
+        $product->slug = $this->makeUniqueSlug(Str::slug($product->name));
         $product->price = request()->price;
         $product->quantity = request()->quantity;
         $product->description = request()->description??'';
+
+
         if ($product->save()){
             $this->saveRelationals($product);
             return ['success'=>true, 'data'=>$product];
@@ -42,14 +46,29 @@ class ProductRepository extends RepositoryPattern implements ProductRepositoryIn
         return ['success'=>false, 'errors'=>[], 'status'=>500];
     }
 
+    private function makeUniqueSlug($slug){
+        $product = Product::where('slug',$slug)->first();
+        if (!empty($product)){
+            $slug .= 1;
+            return $this->makeUniqueSlug($slug);
+        }
+        return $slug;
+    }
+
     private function saveRelationals($product){
         if (!empty(request()->category_ids))
-            foreach (request()->category_ids as $category_id)
+            foreach (explode(',', request()->category_ids) as $category_id)
                 $product->categories()->attach($product, ['category_id'=>$category_id]);
 
         if (!empty(request()->images))
-            foreach (request()->images as $image)
-                $product->images()->save((new ProductImage(['image'=>$image])));
+            foreach (request()->images as $image){
+                $imageName = time().'.'.$image->extension();
+                if ($image->move(public_path('public/images/products/'), $imageName)){
+//                    Storage::putFileAs('public/images/products/'.$product->id . '/' . $imageName, (string)$image->encode('png', 95), $imageName);
+                    $product->images()->save((new ProductImage(['image'=>$imageName])));
+
+                }
+            }
 
     }
 
@@ -64,11 +83,12 @@ class ProductRepository extends RepositoryPattern implements ProductRepositoryIn
             return ['success'=>false, 'errors'=>$validator->errors(), 'status'=>422];
         $product = Product::findOrFail($id);
         $product->name = request()->name;
-        $product->slug = request()->slug;
+        $product->slug = $this->makeUniqueSlug(Str::slug($product->name));
         $product->price = request()->price;
         $product->quantity = request()->quantity;
         $product->description = request()->description??'';
         if ($product->save()){
+            $this->saveRelationals($product);
             return ['success'=>true, 'data'=>$product];
         }
         return ['success'=>false, 'errors'=>[], 'status'=>500];
@@ -76,7 +96,9 @@ class ProductRepository extends RepositoryPattern implements ProductRepositoryIn
 
 
     public function findById($id){
-        return ProductResource::make(Product::find($id))->resolve();
+        $product = Product::where('id',$id)->with(['images', 'categories'])->first();
+
+        return ProductResource::make($product)->resolve();
     }
 
     public function delete($id){

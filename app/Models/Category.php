@@ -11,4 +11,12 @@ class Category extends Model
     public function products(){
         return $this->belongsToMany(CategoryProduct::class);
     }
+
+    public function optionFormat(): array
+    {
+        return [
+            'label'=>$this->name,
+            'value'=>$this->id
+        ];
+    }
 }

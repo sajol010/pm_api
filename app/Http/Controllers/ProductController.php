@@ -42,6 +42,7 @@ class ProductController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+
         $response = $this->productRepository->save();
         if (!empty($response['success']))
             return $this->success($response['data'], 'Data has been saved.', 201);
@@ -64,6 +65,7 @@ class ProductController extends Controller
 
         return $this->fail('Product not found', '', 404);
     }
+
 
     /**
      * Update the specified resource in storage.

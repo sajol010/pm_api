@@ -19,6 +19,42 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'price' => $this->price,
             'quantity' => $this->quantity,
+            'images'=>$this->serializeImage($this->images),
+            'categories'=>$this->serializeCategory($this->categories),
+            'category_options'=>$this->serializeCategory($this->category_products),
         ];
+    }
+
+    /**
+     * @param $images
+     * @return array
+     */
+    private function serializeImage($images){
+        if (empty($images))
+            return [];
+        $img = [];
+        foreach ($images as $image){
+            $img[] = [
+                'id'=>$image->id,
+                'image'=>$image->image,
+                'product_id'=>$image->product_id,
+            ];
+        }
+        return $img;
+    }
+
+    /**
+     * @param $categories
+     * @return array
+     */
+    private function serializeCategory($categories){
+        if (empty($categories))
+            return [];
+        $category = [];
+
+        foreach ($categories as $cat){
+            $category[] = $cat->id;
+        }
+        return $category;
     }
 }

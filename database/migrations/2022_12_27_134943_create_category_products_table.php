@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('category_products', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('product_id')->default(0);
             $table->unsignedBigInteger('category_id');
             $table->timestamps();
         });
