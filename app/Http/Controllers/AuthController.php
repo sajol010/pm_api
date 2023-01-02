@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\{JsonResponse,Request};
-use Illuminate\Support\Facades\{Auth, Validator};
+use Illuminate\Support\Facades\{Auth, Hash, Validator};
 
 class AuthController extends Controller
 {
@@ -23,8 +23,9 @@ class AuthController extends Controller
 
         if ($validator->fails())
             return $this->fail('Please correct the following errors.', $validator->errors(), 422);
-
-        $user = User::create($request->only(['name', 'email', 'password']));
+        $userData = $request->only(['name', 'email', 'password']);
+        $userData['password'] = Hash::make($userData['password']);
+        $user = User::create($userData);
         return $this->success($user, 'User has been added!', 201);
     }
 
